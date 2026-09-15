@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>我的2035 · 理想生成器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;
+    background: linear-gradient(160deg, #0a1633 0%, #12285a 55%, #1a3a7a 100%);
+    min-height: 100vh; color: #eaf0ff; padding-bottom: 40px;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 20px 18px; }
+  header { text-align: center; padding: 26px 0 18px; }
+  .badge { display: inline-block; font-size: 12px; letter-spacing: 2px; color: #9fb8e8; border: 1px solid rgba(159,184,232,.4); border-radius: 20px; padding: 4px 14px; margin-bottom: 14px; }
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: 1px; }
+  h1 .accent { background: linear-gradient(90deg, #ffd76e, #ffb347); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { font-size: 13px; color: #9fb8e8; margin-top: 10px; line-height: 1.7; }
+
+  .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 20px 18px; margin-top: 18px; backdrop-filter: blur(6px); }
+  .step-title { font-size: 15px; font-weight: 700; color: #ffd76e; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .step-title .num { background: linear-gradient(135deg, #ffd76e, #ffb347); color: #12285a; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+
+  label { display: block; font-size: 13px; color: #9fb8e8; margin: 12px 0 6px; }
+  label b { color: #ffd76e; font-weight: 600; }
+  input[type=text] {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18);
+    background: rgba(10,22,51,.55); color: #fff; font-size: 15px; outline: none; transition: border .2s;
+  }
+  input[type=text]:focus { border-color: #ffd76e; }
+  input::placeholder { color: #5a6f9e; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chip { font-size: 12px; color: #cfe0ff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 5px 12px; cursor: pointer; transition: all .2s; }
+  .chip:active, .chip.on { background: rgba(255,215,110,.18); border-color: #ffd76e; color: #ffd76e; }
+
+  .preview {
+    margin-top: 16px; padding: 16px; border-radius: 14px; text-align: center;
+    background: linear-gradient(135deg, rgba(255,215,110,.10), rgba(255,179,71,.05));
+    border: 1px dashed rgba(255,215,110,.45); font-size: 15px; line-height: 2; min-height: 64px;
+  }
+  .preview .yr { color: #ffd76e; font-weight: 800; }
+  .preview .hint { font-size: 12px; color: #7d92c2; line-height: 1.6; margin-top: 4px; }
+
+  .btn-main {
+    display: block; width: 100%; margin-top: 20px; padding: 15px; border: none; border-radius: 14px;
+    background: linear-gradient(90deg, #ffd76e, #ffb347); color: #12285a;
+    font-size: 17px; font-weight: 800; letter-spacing: 2px; cursor: pointer; box-shadow: 0 6px 24px rgba(255,190,80,.35);
+  }
+  .btn-main:active { transform: scale(.98); }
+  .btn-ghost {
+    display: block; width: 100%; margin-top: 12px; padding: 12px; border-radius: 14px;
+    background: transparent; border: 1px solid rgba(255,255,255,.25); color: #cfe0ff; font-size: 14px; cursor: pointer;
+  }
+
+  #roadmapBox { display: none; }
+  .milestones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .milestone { background: rgba(10,22,51,.5); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 10px 12px; }
+  .milestone .y { font-size: 13px; font-weight: 800; color: #ffd76e; }
+  .milestone input { width: 100%; background: none; border: none; color: #eaf0ff; font-size: 13px; outline: none; margin-top: 6px; }
+
+  #canvasBox { display: none; margin-top: 18px; text-align: center; }
+  #cardCanvas { width: 100%; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+  .save-tip { font-size: 12px; color: #9fb8e8; margin-top: 10px; line-height: 1.7; }
+
+  footer { text-align: center; margin-top: 30px; font-size: 12px; color: #5a6f9e; line-height: 1.9; }
+  .counter { color: #ffd76e; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">思想道德与法治 · 与2035年的自己对话</div>
+    <h1>我的<span class="accent">2035</span></h1>
+    <div class="sub">理想不是喊出来的，是写出来、画出来的。<br>补全下面三个空，生成你的 2035。</div>
+  </header>
+
+  <!-- 第一步：三要素句式 -->
+  <div class="card" id="formBox">
+    <div class="step-title"><span class="num">1</span>补全你的 2035</div>
+
+    <label><b>第一空</b> · 理想：2035年，我在哪、做什么岗位？</label>
+    <input type="text" id="f1" maxlength="30" placeholder="例：泰山之巅，中英双语智慧讲解员">
+    <div class="chips" data-for="f1">
+      <span class="chip">泰山之巅·双语讲解员</span>
+      <span class="chip">国际旅行社·研学导师</span>
+      <span class="chip">智慧酒店·数字运营师</span>
+      <span class="chip">文旅局·数字规划师</span>
+    </div>
+
+    <label><b>第二空</b> · 行动：用什么专业行动做到？</label>
+    <input type="text" id="f2" maxlength="30" placeholder="例：用中英双语讲好中国故事">
+    <div class="chips" data-for="f2">
+      <span class="chip">双语讲解中国故事</span>
+      <span class="chip">设计红色研学课程</span>
+      <span class="chip">AI定制旅行服务</span>
+      <span class="chip">运营文旅新媒体</span>
+    </div>
+
+    <label><b>第三空</b> · 国家需要：服务什么？</label>
+    <input type="text" id="f3" maxlength="30" placeholder="例：服务文化强国与国际传播">
+    <div class="chips" data-for="f3">
+      <span class="chip">服务文化强国建设</span>
+      <span class="chip">服务国际传播</span>
+      <span class="chip">服务乡村振兴</span>
+      <span class="chip">服务“一带一路”文旅交流</span>
+    </div>
+
+    <div class="preview" id="preview">
+      <span class="hint">三个空填完，你的理想句式会在这里实时生成——</span>
+    </div>
+
+    <button class="btn-main" id="genBtn">生 成 我 的 2035 路 线 图</button>
+  </div>
+
+  <!-- 第二步：路线图微调 -->
+  <div class="card" id="roadmapBox">
+    <div class="step-title"><span class="num">2</span>检查你的路线图（可修改）</div>
+    <div class="milestones">
+      <div class="milestone"><div class="y">2026 · 起步</div><input type="text" id="m0" maxlength="22"></div>
+      <div class="milestone"><div class="y">2028 · 深耕</div><input type="text" id="m1" maxlength="22"></div>
+      <div class="milestone"><div class="y">2031 · 跃升</div><input type="text" id="m2" maxlength="22"></div>
+      <div class="milestone"><div class="y">2035 · 抵达</div><input type="text" id="m3" maxlength="22"></div>
+    </div>
+    <button class="btn-main" id="drawBtn" style="margin-top:16px">生 成 分 享 卡 片</button>
+  </div>
+
+  <!-- 第三步：卡片 -->
+  <div id="canvasBox">
+    <canvas id="cardCanvas" width="1080" height="1520"></canvas>
+    <div class="save-tip">长按图片保存到相册 / 右键另存<br>把你的 2035 发到班级群，让理想被看见</div>
+    <button class="btn-ghost" id="againBtn">↻ 重新填写</button>
+  </div>
+
+  <footer>
+    山东旅游职业学院 · 思想政治理论课教学部<br>
+    <span class="counter" id="counter"></span><br>
+    把个人理想写进国家蓝图 —— 强国建设，有我一程
+  </footer>
+</div>
+
+<script>
+/* ---------- 互动计数（本地留存，体现数据可记录） ---------- */
+var KEY = 'my2035_count';
+var cnt = 0;
+try { cnt = parseInt(localStorage.getItem(KEY) || '0', 10) || 0; } catch (e) {}
+function paintCounter() {
+  document.getElementById('counter').textContent = cnt > 0
+    ? '本机已生成 ' + cnt + ' 份理想 —— 每一份都会被认真对待' : '';
+}
+function bumpCounter() {
+  cnt += 1;
+  try { localStorage.setItem(KEY, String(cnt)); } catch (e) {}
+  paintCounter();
+}
+paintCounter();
+
+/* ---------- 快捷词 ---------- */
+document.querySelectorAll('.chips').forEach(function (box) {
+  box.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t.classList.contains('chip')) return;
+    document.getElementById(box.dataset.for).value = t.textContent;
+    box.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('on'); });
+    t.classList.add('on');
+    renderPreview();
+  });
+});
+['f1', 'f2', 'f3'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', renderPreview);
+});
+
+/* ---------- 句式实时预览 ---------- */
+function renderPreview() {
+  var a = document.getElementById('f1').value.trim();
+  var b = document.getElementById('f2').value.trim();
+  var c = document.getElementById('f3').value.trim();
+  var box = document.getElementById('preview');
+  if (!a && !b && !c) {
+    box.innerHTML = '<span class="hint">三个空填完，你的理想句式会在这里实时生成——</span>';
+    return;
+  }
+  box.innerHTML = '<span class="yr">2035</span> 年，我在 ' + esc(a || '＿＿') +
+    '，<br>用 ' + esc(b || '＿＿') + '，服务 ' + esc(c || '＿＿') + '。';
+}
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* ---------- 路线图模板库（按岗位关键词匹配） ---------- */
+var ROUTES = [
+  { kw: ['讲解', '导游', '讲师', '双语'], steps: ['夯实讲解基本功，考取导游证', '深耕齐鲁文化，练成讲解骨干', '善用AI做国际传播', '成为国际金牌讲解员'] },
+  { kw: ['研学', '红色'], steps: ['吃透红色资源，考取研学证书', '设计首个研学课程方案', '主持品牌研学线路', '成为红色研学金牌导师'] },
+  { kw: ['酒店', '民宿'], steps: ['练好服务基本功，考取职业证书', '轮岗积累运营经验', '主导数字化运营项目', '成为智慧运营负责人'] },
+  { kw: ['数字', '电商', '新媒体', '运营', '直播'], steps: ['掌握内容创作与数据工具', '跑通首个文旅账号', '打造出圈传播案例', '成为文旅数字运营专家'] },
+  { kw: ['规划', '策划'], steps: ['学好规划方法与工具', '参与真实项目实践', '独立完成方案设计', '成为文旅数字规划师'] },
+  { kw: ['管理', '经理'], steps: ['夯实专业基础与证书', '一线岗位历练成长', '带团队攻坚项目', '成为行业业务带头人'] }
+];
+var DEFAULT_ROUTE = ['打牢专业基本功，拿下关键证书', '深耕一个领域，成为行家里手', '拥抱AI工具，放大专业价值', '成为理想中的那个自己'];
+
+function matchRoute(post) {
+  for (var i = 0; i < ROUTES.length; i++) {
+    for (var j = 0; j < ROUTES[i].kw.length; j++) {
+      if (post.indexOf(ROUTES[i].kw[j]) >= 0) return ROUTES[i].steps;
+    }
+  }
+  return DEFAULT_ROUTE;
+}
+
+/* ---------- 生成流程 ---------- */
+document.getElementById('genBtn').addEventListener('click', function () {
+  var a = document.getElementById('f1').value.trim();
+  var b = document.getElementById('f2').value.trim();
+  var c = document.getElementById('f3').value.trim();
+  if (!a || !b || !c) {
+    alert('三个空一个都不能少：第一空是理想，第二空是行动，第三空是国家的需要。');
+    return;
+  }
+  var steps = matchRoute(a + b + c);
+  ['m0', 'm1', 'm2', 'm3'].forEach(function (id, i) {
+    document.getElementById(id).value = steps[i];
+  });
+  document.getElementById('roadmapBox').style.display = 'block';
+  document.getElementById('roadmapBox').scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('drawBtn').addEventListener('click', function () {
+  drawCard();
+  bumpCounter();
+});
+
+document.getElementById('againBtn').addEventListener('click', function () {
+  document.getElementById('canvasBox').style.display = 'none';
+  document.getElementById('roadmapBox').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* ---------- 卡片绘制 ---------- */
+function drawCard() {
+  var cv = document.getElementById('cardCanvas');
+  var g = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+
+  // 背景
+  var bg = g.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0a1633'); bg.addColorStop(.55, '#12285a'); bg.addColorStop(1, '#1a3a7a');
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+  // 星点
+  for (var i = 0; i < 90; i++) {
+    var x = Math.random() * W, y = Math.random() * H * .55, r = Math.random() * 1.8 + .4;
+    g.globalAlpha = Math.random() * .6 + .15;
+    g.fillStyle = '#cfe0ff';
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = 1;
+
+  // 光晕
+  var glow = g.createRadialGradient(W / 2, 380, 40, W / 2, 380, 420);
+  glow.addColorStop(0, 'rgba(255,215,110,.22)'); glow.addColorStop(1, 'rgba(255,215,110,0)');
+  g.fillStyle = glow; g.fillRect(0, 0, W, 800);
+
+  // 顶部
+  g.textAlign = 'center';
+  g.fillStyle = '#9fb8e8'; g.font = '24px "Microsoft YaHei", sans-serif';
+  g.fillText('思想道德与法治 · 与2035年的自己对话', W / 2, 88);
+
+  g.font = '900 150px "Microsoft YaHei", sans-serif';
+  var grad = g.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
+  grad.addColorStop(0, '#ffd76e'); grad.addColorStop(1, '#ffb347');
+  g.fillStyle = grad;
+  g.fillText('我的 2035', W / 2, 250);
+
+  // 理想句式卡
+  var a = document.getElementById('f1').value.trim();
+  var b = document.getElementById('f2').value.trim();
+  var c = document.getElementById('f3').value.trim();
+  var cardY = 330, cardH = 330;
+  roundRect(g, 70, cardY, W - 140, cardH, 26, 'rgba(255,255,255,.08)');
+  g.strokeStyle = 'rgba(255,215,110,.5)'; g.lineWidth = 2;
+  roundRectStroke(g, 70, cardY, W - 140, cardH, 26);
+
+  g.fillStyle = '#ffd76e'; g.font = 'bold 28px "Microsoft YaHei", sans-serif';
+  g.fillText('· 我 的 理 想 ·', W / 2, cardY + 56);
+  g.fillStyle = '#eaf0ff'; g.font = 'bold 38px "Microsoft YaHei", sans-serif';
+  wrapText(g, '2035年，我在' + a + '，', W / 2, cardY + 120, W - 220, 54);
+  wrapText(g, '用' + b + '，服务' + c + '。', W / 2, cardY + 180, W - 220, 54);
+
+  // 时间轴
+  var tlX0 = 130, tlX1 = W - 130, tlY = cardY + cardH + 120;
+  g.strokeStyle = 'rgba(159,184,232,.5)'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(tlX0, tlY); g.lineTo(tlX1, tlY); g.stroke();
+
+  var years = ['2026', '2028', '2031', '2035'];
+  var labels = ['m0', 'm1', 'm2', 'm3'].map(function (id) { return document.getElementById(id).value.trim(); });
+  for (var k = 0; k < 4; k++) {
+    var x = tlX0 + (tlX1 - tlX0) * k / 3;
+    var isLast = k === 3;
+    // 节点
+    g.beginPath(); g.arc(x, tlY, isLast ? 16 : 11, 0, Math.PI * 2);
+    g.fillStyle = isLast ? '#ffd76e' : '#cfe0ff'; g.fill();
+    if (isLast) { g.strokeStyle = 'rgba(255,215,110,.45)'; g.lineWidth = 8; g.stroke(); }
+    // 年份
+    g.fillStyle = isLast ? '#ffd76e' : '#9fb8e8';
+    g.font = (isLast ? '900 34px' : 'bold 30px') + ' "Microsoft YaHei", sans-serif';
+    g.fillText(years[k], x, tlY - 46);
+    // 里程碑
+    g.fillStyle = '#eaf0ff'; g.font = '26px "Microsoft YaHei", sans-serif';
+    wrapText(g, labels[k], x, tlY + 60, 236, 40);
+  }
+
+  // 底部
+  g.fillStyle = '#5a6f9e'; g.font = '22px "Microsoft YaHei", sans-serif';
+  g.fillText('把个人理想写进国家蓝图 · 强国建设，有我一程', W / 2, H - 96);
+  g.fillStyle = '#7d92c2'; g.font = '20px "Microsoft YaHei", sans-serif';
+  g.fillText('山东旅游职业学院 · 思想政治理论课教学部', W / 2, H - 56);
+
+  document.getElementById('canvasBox').style.display = 'block';
+  document.getElementById('canvasBox').scrollIntoView({ behavior: 'smooth' });
+}
+
+function roundRect(g, x, y, w, h, r, fill) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+  if (fill) { g.fillStyle = fill; g.fill(); }
+}
+function roundRectStroke(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+  g.stroke();
+}
+function wrapText(g, text, cx, y, maxW, lineH) {
+  var line = '', lines = [];
+  for (var i = 0; i < text.length; i++) {
+    if (g.measureText(line + text[i]).width > maxW && line) { lines.push(line); line = text[i]; }
+    else { line += text[i]; }
+  }
+  if (line) lines.push(line);
+  if (lines.length > 3) { lines = lines.slice(0, 3); lines[2] = lines[2].slice(0, -1) + '…'; }
+  lines.forEach(function (ln, idx) { g.fillText(ln, cx, y + idx * lineH); });
+  return y + lines.length * lineH;
+}
+</script>
+</body>
+</html>
